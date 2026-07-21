@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email', 'password'])]
+#[Fillable(['name', 'email', 'password', 'is_writer', 'is_revisore', 'is_admin'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -27,6 +27,17 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_writer' => 'boolean',
+            'is_revisore' => 'boolean',
+            'is_admin' => 'boolean',
         ];
+    }
+
+    /**
+     * Relazione: un utente può scrivere più articoli.
+     */
+    public function posts()
+    {
+        return $this->hasMany(Post::class, 'id_utente');
     }
 }
