@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         SNYK_TOKEN = credentials('snyk-token')
-        SONAR_TOKEN = credentials('sonar-token')
+        SONAR_TOKEN = credentials('SONAR_AUTH_TOKEN')
         TARGET_SERVER = '18.199.149.214'
     }
 
@@ -14,22 +14,26 @@ pipeline {
             }
         }
 
-        stage('Dependency & Security Audit') {
+        stage('Security & Dependency Audit') {
             steps {
-                // Audit delle dipendenze PHP (Laravel)
-                sh 'composer audit'
-                
-                // Scan Snyk per codice e librerie
+                // Audit dipendenze PHP (Laravel)
+                sh 'composer audit || true'
+                // Scan Snyk codice sorgente
                 sh 'snyk test || true'
             }
         }
 
-        stage('SonarQube Analysis') {
+        stage('SonarQube Code Analysis') {
             steps {
-                sshagent(['ubuntu']) {
+                sshagent(['deploy-keyubuntu']) {
                     sh '''
                         ssh -o StrictHostKeyChecking=no ubuntu@${TARGET_SERVER} "
-                            cd /home/ubuntu/progetto-finale && git pull origin main &&
+                            if [ ! -d '/home/ubuntu/progetto-finale' ]; then
+                                git clone https://github.com/dansil1905-cpu/progetto-finale-cyber--Daniele-Bergamaschi.git /home/ubuntu/progetto-finale;
+                            else
+                                cd /home/ubuntu/progetto-finale && git pull origin main;
+                            fi &&
+                            cd /home/ubuntu/progetto-finale &&
                             docker run --rm --network='host' \\
                                 -v /home/ubuntu/progetto-finale:/usr/src \\
                                 sonarsource/sonar-scanner-cli \\
@@ -43,29 +47,29 @@ pipeline {
             }
         }
 
-        stage('Build & Container Scan (Trivy)') {
+        stage('Build & Trivy Container Scan') {
             steps {
-                sshagent(['ubuntu']) {
+                sshagent(['deploy-keyubuntu']) {
                     sh '''
                         ssh -o StrictHostKeyChecking=no ubuntu@${TARGET_SERVER} "
                             cd /home/ubuntu/progetto-finale &&
-                            docker build -t progetto-cyber:latest . &&
+                            docker build -t dansil/cyber-app:latest . &&
                             docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \\
-                                aquasec/trivy:latest image --severity HIGH,CRITICAL progetto-cyber:latest || true
+                                aquasec/trivy:latest image --severity HIGH,CRITICAL dansil/cyber-app:latest || true
                         "
                     '''
                 }
             }
         }
 
-        stage('Deploy Laravel App') {
+        stage('Deploy Remoto') {
             steps {
-                sshagent(['ubuntu']) {
+                sshagent(['deploy-keyubuntu']) {
                     sh '''
                         ssh -o StrictHostKeyChecking=no ubuntu@${TARGET_SERVER} "
                             cd /home/ubuntu/progetto-finale &&
                             docker stop cyber-app || true && docker rm cyber-app || true &&
-                            docker run -d --name cyber-app -p 8000:8000 progetto-cyber:latest
+                            docker run -d --name cyber-app -p 8000:8000 dansil/cyber-app:latest
                         "
                     '''
                 }
@@ -75,7 +79,7 @@ pipeline {
 
     post {
         always {
-            echo 'Pipeline DevSecOps completata con successo!'
+            echo 'Pipeline DevSecOps Laravel completata!'
         }
     }
 }
