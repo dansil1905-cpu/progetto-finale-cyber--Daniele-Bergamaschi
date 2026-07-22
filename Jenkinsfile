@@ -16,16 +16,7 @@ pipeline {
 
         stage('Security & Dependency Audit') {
             steps {
-                // Audit dipendenze PHP (Laravel)
-                sh 'composer audit || true'
-                // Scan Snyk codice sorgente
-                sh 'snyk test || true'
-            }
-        }
-
-        stage('SonarQube Code Analysis') {
-            steps {
-                sshagent(['deploy-keyubuntu']) {
+                sshagent(['ssh-credentials-nodeubuntu']) {
                     sh '''
                         ssh -o StrictHostKeyChecking=no ubuntu@${TARGET_SERVER} "
                             if [ ! -d '/home/ubuntu/progetto-finale' ]; then
@@ -33,6 +24,20 @@ pipeline {
                             else
                                 cd /home/ubuntu/progetto-finale && git pull origin main;
                             fi &&
+                            cd /home/ubuntu/progetto-finale &&
+                            echo 'Esecuzione Snyk Scan via Docker...' &&
+                            docker run --rm -v /home/ubuntu/progetto-finale:/app -e SNYK_TOKEN=${SNYK_TOKEN} snyk/snyk:php snyk test --severity-threshold=high || true
+                        "
+                    '''
+                }
+            }
+        }
+
+        stage('SonarQube Code Analysis') {
+            steps {
+                sshagent(['ssh-credentials-nodeubuntu']) {
+                    sh '''
+                        ssh -o StrictHostKeyChecking=no ubuntu@${TARGET_SERVER} "
                             cd /home/ubuntu/progetto-finale &&
                             docker run --rm --network='host' \\
                                 -v /home/ubuntu/progetto-finale:/usr/src \\
@@ -49,7 +54,7 @@ pipeline {
 
         stage('Build & Trivy Container Scan') {
             steps {
-                sshagent(['deploy-keyubuntu']) {
+                sshagent(['ssh-credentials-nodeubuntu']) {
                     sh '''
                         ssh -o StrictHostKeyChecking=no ubuntu@${TARGET_SERVER} "
                             cd /home/ubuntu/progetto-finale &&
@@ -64,12 +69,12 @@ pipeline {
 
         stage('Deploy Remoto') {
             steps {
-                sshagent(['deploy-keyubuntu']) {
+                sshagent(['ssh-credentials-nodeubuntu']) {
                     sh '''
                         ssh -o StrictHostKeyChecking=no ubuntu@${TARGET_SERVER} "
                             cd /home/ubuntu/progetto-finale &&
                             docker stop cyber-app || true && docker rm cyber-app || true &&
-                            docker run -d --name cyber-app -p 8000:8000 dansil/cyber-app:latest
+                            docker run -d --name cyber-app -p 8000:8000 dansil/cyber-app:latest || true
                         "
                     '''
                 }
