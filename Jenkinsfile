@@ -4,7 +4,7 @@ pipeline {
     environment {
         SNYK_TOKEN = credentials('snyk-token')
         SONAR_TOKEN = credentials('SONAR_AUTH_TOKEN')
-        TARGET_SERVER = '18.199.149.214'
+        TARGET_SERVER = '54.93.234.116'
     }
 
     stages {
