@@ -1,50 +1,81 @@
-pipeline { 
-    agent { label 'agent1' } // Utilizzo dell'agente dedicato (PBAC)
+pipeline {
+    agent any
 
-    stages { 
-        stage('Checkout') { 
-            steps { 
-                checkout scm 
-            } 
-        } 
+    environment {
+        SNYK_TOKEN = credentials('snyk-token')
+        SONAR_TOKEN = credentials('sonar-token')
+        TARGET_SERVER = '18.199.149.214'
+    }
 
-        stage('Install Dependencies') { 
-            steps { 
-                sh 'npm install' 
-            } 
-        } 
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
 
-        stage('Static Code Analysis (SonarQube)') { 
-            steps { 
-                echo 'Esecuzione SonarQube SAST in corso...' 
-            } 
-        } 
+        stage('Dependency & Security Audit') {
+            steps {
+                // Audit delle dipendenze PHP (Laravel)
+                sh 'composer audit'
+                
+                // Scan Snyk per codice e librerie
+                sh 'snyk test || true'
+            }
+        }
 
-        stage('Dependency Scanning (Snyk)') { 
-            steps { 
-                withCredentials([string(credentialsId: 'jenkins-snyk', variable: 'SNYK_TOKEN')]) { 
-                    sh 'docker run --rm --env SNYK_TOKEN=${SNYK_TOKEN} -v $(pwd):/app snyk/snyk:node snyk test || true' 
-                } 
-            } 
-        } 
+        stage('SonarQube Analysis') {
+            steps {
+                sshagent(['ubuntu']) {
+                    sh '''
+                        ssh -o StrictHostKeyChecking=no ubuntu@${TARGET_SERVER} "
+                            cd /home/ubuntu/progetto-finale && git pull origin main &&
+                            docker run --rm --network='host' \\
+                                -v /home/ubuntu/progetto-finale:/usr/src \\
+                                sonarsource/sonar-scanner-cli \\
+                                -Dsonar.projectKey=progetto-finale-cyber \\
+                                -Dsonar.token=${SONAR_TOKEN} \\
+                                -Dsonar.sources=. \\
+                                -Dsonar.exclusions='**/vendor/**,**/node_modules/**,**/.git/**' || true
+                        "
+                    '''
+                }
+            }
+        }
 
-        stage('Docker Image Build') { 
-            steps { 
-                sh 'docker build -f nodeApp.Dockerfile -t cyber-progetto-app:latest .' 
-            } 
-        } 
+        stage('Build & Container Scan (Trivy)') {
+            steps {
+                sshagent(['ubuntu']) {
+                    sh '''
+                        ssh -o StrictHostKeyChecking=no ubuntu@${TARGET_SERVER} "
+                            cd /home/ubuntu/progetto-finale &&
+                            docker build -t progetto-cyber:latest . &&
+                            docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \\
+                                aquasec/trivy:latest image --severity HIGH,CRITICAL progetto-cyber:latest || true
+                        "
+                    '''
+                }
+            }
+        }
 
-        stage('Container Security Scanning (Aqua Trivy)') { 
-            steps { 
-                // Aggiunto || true per registrare le vulnerabilità nel log senza fallire la build su Jenkins
-                sh 'trivy image --severity HIGH,CRITICAL cyber-progetto-app:latest || true' 
-            } 
-        } 
-    } 
-     
-    post { 
-        always { 
-            sh 'docker logout || true' 
-        } 
-    } 
+        stage('Deploy Laravel App') {
+            steps {
+                sshagent(['ubuntu']) {
+                    sh '''
+                        ssh -o StrictHostKeyChecking=no ubuntu@${TARGET_SERVER} "
+                            cd /home/ubuntu/progetto-finale &&
+                            docker stop cyber-app || true && docker rm cyber-app || true &&
+                            docker run -d --name cyber-app -p 8000:8000 progetto-cyber:latest
+                        "
+                    '''
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            echo 'Pipeline DevSecOps completata con successo!'
+        }
+    }
 }

@@ -6,13 +6,11 @@ import crypto from 'crypto';
 const app = express(); 
 const PORT = process.env.PORT || 3000; 
 
-// Misure di sicurezza: Intestazioni HTTP con Helmet 
 app.use(helmet()); 
-
-// Protezione contro il brute-forcing con express-rate-limit 
+ 
 const limiter = rateLimit({ 
-    windowMs: 15 * 60 * 1000, // 15 minuti 
-    max: 100, // Limite di 100 richieste per IP 
+    windowMs: 15 * 60 * 1000,
+    max: 100, 
     standardHeaders: true, 
     legacyHeaders: false, 
     message: 'Troppe richieste effettuate da questo IP, riprova più tardi.' 
@@ -20,8 +18,7 @@ const limiter = rateLimit({
 app.use(limiter); 
 
 app.use(express.json()); 
-
-// --- ROTTE DEL CYBER BLOG --- 
+ 
 app.get('/', (req, res) => { 
     res.json({  
         status: 'success', 
@@ -34,7 +31,7 @@ app.get('/', (req, res) => {
 }); 
 
 app.get('/posts', (req, res) => { 
-    // Simulazione di recupero articoli approvati 
+ 
     res.json({ 
         success: true, 
         count: 1, 
@@ -44,8 +41,6 @@ app.get('/posts', (req, res) => {
     }); 
 }); 
 
-// --- ROTTE TRAVEL-AGENT-API (Financial App) --- 
-// Salvataggio dati finanziari con cifratura AES-256-GCM (Algoritmo sicuro e moderno)
 app.post('/api/financial/records', (req, res) => { 
     const { card_number, balance, sensitive_info } = req.body; 
 
@@ -53,10 +48,8 @@ app.post('/api/financial/records', (req, res) => {
         return res.status(400).json({ success: false, message: 'Campi obbligatori mancanti.' }); 
     } 
 
-    // Mascheramento carta di credito 
     const maskedCard = '****-****-****-' + String(card_number).slice(-4); 
      
-    // Cifratura sicura tramite AES-256-CBC con IV generato casualmente
     const algorithm = 'aes-256-cbc';
     const key = crypto.scryptSync('chiave-segreta-sicura', 'salt', 32);
     const iv = crypto.randomBytes(16);
