@@ -2,16 +2,26 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Post extends Model
 {
-    Schema::create('posts', function (Blueprint $table) {
-    $table->id();
-    $table->string('title');
-    $table->text('body');
-    $table->string('status')->default('pending');
-    $table->foreignId('user_id')->constrained()->onDelete('cascade');
-    $table->timestamps();
-    });
+    use HasFactory;
+
+    protected $fillable = [
+        'title',
+        'slug',
+        'content',
+        'status',
+        'id_utente',
+    ];
+
+    /**
+     * Relazione: Un articolo appartiene a un utente.
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'id_utente');
+    }
 }

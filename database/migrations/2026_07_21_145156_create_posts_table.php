@@ -12,9 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('posts', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
-        });
+    $table->id();
+    $table->string('title');
+    $table->string('slug')->unique();
+    $table->text('content');
+    $table->string('status')->default('pending');
+    $table->foreignId('id_utente')->constrained('users')->onDelete('cascade');
+    $table->timestamps();
+});
     }
 
     /**
