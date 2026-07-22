@@ -16,7 +16,7 @@ pipeline {
 
         stage('Security & Dependency Audit') {
             steps {
-                sshagent(['ssh-credentials-nodeubuntu']) {
+                sshagent(['ubuntu-ssh']) {
                     sh '''
                         ssh -o StrictHostKeyChecking=no ubuntu@${TARGET_SERVER} "
                             if [ ! -d '/home/ubuntu/progetto-finale' ]; then
@@ -35,7 +35,7 @@ pipeline {
 
         stage('SonarQube Code Analysis') {
             steps {
-                sshagent(['ssh-credentials-nodeubuntu']) {
+                sshagent(['ubuntu-ssh']) {
                     sh '''
                         ssh -o StrictHostKeyChecking=no ubuntu@${TARGET_SERVER} "
                             cd /home/ubuntu/progetto-finale &&
@@ -54,7 +54,7 @@ pipeline {
 
         stage('Build & Trivy Container Scan') {
             steps {
-                sshagent(['ssh-credentials-nodeubuntu']) {
+                sshagent(['ubuntu-ssh']) {
                     sh '''
                         ssh -o StrictHostKeyChecking=no ubuntu@${TARGET_SERVER} "
                             cd /home/ubuntu/progetto-finale &&
@@ -69,7 +69,7 @@ pipeline {
 
         stage('Deploy Remoto') {
             steps {
-                sshagent(['ssh-credentials-nodeubuntu']) {
+                sshagent(['ubuntu-ssh']) {
                     sh '''
                         ssh -o StrictHostKeyChecking=no ubuntu@${TARGET_SERVER} "
                             cd /home/ubuntu/progetto-finale &&
