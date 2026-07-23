@@ -16,13 +16,13 @@ pipeline {
 
         stage('Security & Dependency Audit') {
             steps {
-                sshagent(['ubuntu-ssh']) {
+                sshagent(['ubuntu']) {
                     sh '''
                         ssh -o StrictHostKeyChecking=no ubuntu@${TARGET_SERVER} "
                             if [ ! -d '/home/ubuntu/progetto-finale' ]; then
                                 git clone https://github.com/dansil1905-cpu/progetto-finale-cyber--Daniele-Bergamaschi.git /home/ubuntu/progetto-finale;
                             else
-                                cd /home/ubuntu/progetto-finale && git pull origin main;
+                                cd /home/ubuntu/progetto-finale && git fetch origin && git reset --hard origin/main;
                             fi &&
                             cd /home/ubuntu/progetto-finale &&
                             echo 'Esecuzione Snyk Scan via Docker...' &&
@@ -35,7 +35,7 @@ pipeline {
 
         stage('SonarQube Code Analysis') {
             steps {
-                sshagent(['ubuntu-ssh']) {
+                sshagent(['ubuntu']) {
                     sh '''
                         ssh -o StrictHostKeyChecking=no ubuntu@${TARGET_SERVER} "
                             cd /home/ubuntu/progetto-finale &&
@@ -54,7 +54,7 @@ pipeline {
 
         stage('Build & Trivy Container Scan') {
             steps {
-                sshagent(['ubuntu-ssh']) {
+                sshagent(['ubuntu']) {
                     sh '''
                         ssh -o StrictHostKeyChecking=no ubuntu@${TARGET_SERVER} "
                             cd /home/ubuntu/progetto-finale &&
@@ -69,7 +69,7 @@ pipeline {
 
         stage('Deploy Remoto') {
             steps {
-                sshagent(['ubuntu-ssh']) {
+                sshagent(['ubuntu']) {
                     sh '''
                         ssh -o StrictHostKeyChecking=no ubuntu@${TARGET_SERVER} "
                             cd /home/ubuntu/progetto-finale &&
