@@ -5,7 +5,7 @@ pipeline {
         SNYK_TOKEN = credentials('snyk-token')
         SONAR_TOKEN = credentials('SONAR_AUTH_TOKEN')
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
-        SSH_CRED = 'ubuntu-sshubuntu' // Usa l'ID esatto presente su Jenkins
+        SSH_CRED = 'ssh-credentials-nodeubuntu'
         TARGET_SERVER = '54.93.234.116'
     }
 
