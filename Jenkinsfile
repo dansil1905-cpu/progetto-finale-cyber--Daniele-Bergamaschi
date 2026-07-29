@@ -5,7 +5,7 @@ pipeline {
         SNYK_TOKEN = credentials('snyk-token')
         SONAR_TOKEN = credentials('SONAR_AUTH_TOKEN')
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
-        SSH_CRED = 'ssh-credentials-nodeubuntu'
+        SSH_CRED = 'ssh-credentials-node'
         TARGET_SERVER = '54.93.234.116'
     }
 
@@ -20,10 +20,11 @@ pipeline {
             steps {
                 sshagent([SSH_CRED]) {
                     sh '''
-                        echo "--- Connessione SSH riuscita! Esecuzione Audit su server remoto ---"
+                        echo "--- Connessione SSH riuscita! ---"
                         ssh -o StrictHostKeyChecking=no ubuntu@${TARGET_SERVER} "
+                            mkdir -p /home/ubuntu/progetto-finale &&
                             cd /home/ubuntu/progetto-finale &&
-                            echo 'Snyk scan avviato...'
+                            echo 'Ambiente pronto per l\'audit'
                         "
                     '''
                 }
