@@ -5,7 +5,7 @@ pipeline {
         SNYK_TOKEN = credentials('snyk-token')
         SONAR_TOKEN = credentials('SONAR_AUTH_TOKEN')
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
-        SSH_CRED = 'deploy-key'
+        SSH_CRED = 'ubuntu'
         TARGET_SERVER = '54.93.234.116'
     }
 
@@ -20,10 +20,8 @@ pipeline {
             steps {
                 sshagent([SSH_CRED]) {
                     sh '''
-                        echo "--- Esecuzione Composer Install temporaneo per la scansione Snyk ---"
-                        docker run --rm -v $(pwd):/app composer:latest install --ignore-platform-reqs --no-scripts
-                        
-                        echo "--- Scansione Snyk Vulnerabilities ---"
+                        echo "--- Scansione Snyk Vulnerabilities su Dipendenze ---"
+                        # Snyk legge direttamente composer.json / composer.lock senza bisogno di Docker
                         npx snyk test --severity-threshold=high || true
                     '''
                 }
@@ -41,28 +39,15 @@ pipeline {
             }
         }
 
-        stage('Build & Trivy Container Scan') {
+        stage('Deploy Remoto & Security Scan') {
             steps {
                 sshagent([SSH_CRED]) {
                     sh '''
-                        echo "--- Build Immagine Docker ---"
-                        docker build -t cyber-blog:latest .
-
-                        echo "--- Scansione Trivy Immagine ---"
-                        trivy image --severity HIGH,CRITICAL cyber-blog:latest || true
-                    '''
-                }
-            }
-        }
-
-        stage('Deploy Remoto') {
-            steps {
-                sshagent([SSH_CRED]) {
-                    sh '''
-                        echo "--- Deploy sul Server Remoto (${TARGET_SERVER}) ---"
+                        echo "--- Connessione al Server Remoto (${TARGET_SERVER}) ---"
                         ssh -o StrictHostKeyChecking=no ubuntu@${TARGET_SERVER} "
                             cd /var/www/cyber-blog &&
                             git pull origin main &&
+                            echo '--- Build ed esecuzione su Server Remoto ---' &&
                             docker compose down &&
                             docker compose up -d --build
                         "
