@@ -20,11 +20,11 @@ pipeline {
             steps {
                 sshagent([SSH_CRED]) {
                     sh '''
-                        echo "--- Connessione SSH riuscita! ---"
+                        echo "--- Connessione SSH riuscita! Preparazione Audit ---"
                         ssh -o StrictHostKeyChecking=no ubuntu@${TARGET_SERVER} "
                             mkdir -p /home/ubuntu/progetto-finale &&
                             cd /home/ubuntu/progetto-finale &&
-                            echo 'Ambiente pronto per l\'audit'
+                            echo 'Ambiente pronto per audit'
                         "
                     '''
                 }
