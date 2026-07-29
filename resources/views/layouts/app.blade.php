@@ -35,8 +35,8 @@
                             <button type="submit" class="text-sm text-slate-400 hover:text-rose-400 ml-2">Logout</button>
                         </form>
                     @else
-                        <a href="#" class="text-slate-300 hover:text-white text-sm">Accedi</a>
-                        <a href="#" class="bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded-lg text-sm font-medium">Registrati</a>
+                    <a href="{{ route('login') }}" class="text-slate-300 hover:text-white text-sm">Accedi</a>
+                    <a href="{{ route('register') }}" class="bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded-lg text-sm font-medium">Registrati</a>
                     @endauth
                 </div>
             </div>
