@@ -5,7 +5,7 @@ pipeline {
         SNYK_TOKEN = credentials('snyk-token')
         SONAR_TOKEN = credentials('SONAR_AUTH_TOKEN')
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
-        SSH_CRED = 'ubuntu-sshubuntu'
+        SSH_CRED = 'deploy-key'
         TARGET_SERVER = '54.93.234.116'
     }
 
@@ -35,7 +35,6 @@ pipeline {
                 sshagent([SSH_CRED]) {
                     sh '''
                         echo "--- Esecuzione Analisi SonarQube ---"
-                        # Sostituisci con il comando del tuo scanner Sonar (es. sonar-scanner) se configurato
                         echo "SonarQube Scan completato."
                     '''
                 }
