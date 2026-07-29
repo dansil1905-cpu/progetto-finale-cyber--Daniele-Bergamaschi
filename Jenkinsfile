@@ -26,6 +26,8 @@ pipeline {
                                 cd /home/ubuntu/progetto-finale && git fetch origin && git reset --hard origin/main;
                             fi &&
                             cd /home/ubuntu/progetto-finale &&
+                            echo 'Installazione dipendenze temporanee per Snyk Scan...' &&
+                            docker run --rm -v /home/ubuntu/progetto-finale:/app -w /app composer:latest composer install --ignore-platform-reqs --no-scripts || true &&
                             echo 'Esecuzione Snyk Scan per Laravel/PHP...' &&
                             docker run --rm -v /home/ubuntu/progetto-finale:/app -e SNYK_TOKEN=${SNYK_TOKEN} snyk/snyk:php snyk test --severity-threshold=high || true
                         "
