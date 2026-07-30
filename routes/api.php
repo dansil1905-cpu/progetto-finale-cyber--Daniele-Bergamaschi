@@ -7,7 +7,6 @@ use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
-// Rotta per generare il token di accesso (Login API)
 Route::post('/tokens/create', function (Request $request) {
     $request->validate([
         'email' => 'required|email',
@@ -30,12 +29,10 @@ Route::post('/tokens/create', function (Request $request) {
     ]);
 });
 
-// Rotta per ottenere i dati dell'utente autenticato via API
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-// Rotte protette della Financial App (travel-agent-api)
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/financial/records', [FinancialController::class, 'index']);
     Route::post('/financial/records', [FinancialController::class, 'store']);

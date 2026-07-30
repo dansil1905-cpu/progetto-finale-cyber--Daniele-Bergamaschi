@@ -9,13 +9,11 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    // Mostra il form di registrazione
     public function showRegister()
     {
         return view('auth.register');
     }
 
-    // Gestisce l'invio del form di registrazione
     public function register(Request $request)
     {
         $request->validate([
@@ -35,13 +33,11 @@ class AuthController extends Controller
         return redirect()->route('posts.index')->with('success', 'Registrazione completata con successo!');
     }
 
-    // Mostra il form di login
     public function showLogin()
     {
         return view('auth.login');
     }
 
-    // Gestisce l'invio del form di login
     public function login(Request $request)
     {
         $credentials = $request->validate([
@@ -50,7 +46,7 @@ class AuthController extends Controller
         ]);
 
         if (Auth::attempt($credentials)) {
-            $request->session()->regenerate(); // Previene attacchi di Session Fixation
+            $request->session()->regenerate();
             return redirect()->intended(route('posts.index'))->with('success', 'Bentornato!');
         }
 
@@ -59,7 +55,6 @@ class AuthController extends Controller
         ])->onlyInput('email');
     }
 
-    // Gestisce il logout
     public function logout(Request $request)
     {
         Auth::logout();

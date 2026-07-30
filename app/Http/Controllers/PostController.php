@@ -1,16 +1,14 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use Illuminate\Support\Facades\Auth;
 use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class PostController extends Controller
 {
-    /**
-     * Mostra solo gli articoli approvati in Home Page.
-     */
+
     public function index()
     {
         $posts = Post::where('status', 'approved')->latest()->get();
@@ -18,17 +16,13 @@ class PostController extends Controller
         return view('posts.index', compact('posts'));
     }
 
-    /**
-     * Form per creare un articolo.
-     */
+
     public function create()
     {
         return view('posts.create');
     }
 
-    /**
-     * Salvataggio dell'articolo con stato iniziale 'pending'.
-     */
+
     public function store(Request $request)
     {
         $request->validate([
@@ -47,14 +41,12 @@ class PostController extends Controller
         return redirect()->route('posts.index')->with('success', "Articolo inviato con successo! È in attesa di revisione.");
     }
 
-    /**
-     * Dettaglio dell'articolo tramite Slug.
-     */
+
     public function show(Post $post)
     {
-        if ($post->status !== 'approved' && (!auth()->check() || (!auth()->user()->is_revisore && !auth()->user()->is_admin))) {
-            abort(404);
-        }
+        if ($post->status !== 'approved' && (!Auth::check() || (!Auth::user()->is_revisore && !Auth::user()->is_admin))) {
+    abort(404);
+}
 
         return view('posts.show', compact('post'));
     }

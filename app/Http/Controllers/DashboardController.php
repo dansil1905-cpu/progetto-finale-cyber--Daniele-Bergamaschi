@@ -3,13 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Post;
-use Illuminate\Http\Request;
+// use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
-    /**
-     * Dashboard del revisore: mostra solo gli articoli in attesa di approvazione.
-     */
+
     public function reviserDashboard()
     {
         $pendingPosts = Post::where('status', 'pending')->latest()->get();
@@ -17,9 +15,6 @@ class DashboardController extends Controller
         return view('reviser.dashboard', compact('pendingPosts'));
     }
 
-    /**
-     * Approva un articolo per la pubblicazione.
-     */
     public function acceptPost(Post $post)
     {
         $post->update(['status' => 'approved']);
@@ -27,9 +22,6 @@ class DashboardController extends Controller
         return redirect()->back()->with('success', "L'articolo '{$post->title}' è stato approvato e pubblicato.");
     }
 
-    /**
-     * Rifiuta un articolo.
-     */
     public function rejectPost(Post $post)
     {
         $post->update(['status' => 'rejected']);

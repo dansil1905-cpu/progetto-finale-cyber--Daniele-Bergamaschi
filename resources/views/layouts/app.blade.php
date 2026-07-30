@@ -4,12 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ config('app.name', 'Cyber Blog') }}</title>
-    <!-- Tailwind CSS via CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-between font-sans">
 
-    <!-- NAVBAR -->
     <nav class="bg-slate-800 border-b border-slate-700 shadow-lg">
         <div class="max-w-7xl mx-mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
@@ -43,7 +41,6 @@
         </div>
     </nav>
 
-    <!-- MESSAGGI DI FEEDBACK -->
     <div class="max-w-7xl mx-auto px-4 mt-4 w-full">
         @if(session('success'))
             <div class="bg-emerald-900/80 border border-emerald-500 text-emerald-200 px-4 py-3 rounded-lg mb-4">
@@ -57,12 +54,10 @@
         @endif
     </div>
 
-    <!-- CONTENUTO PAGINA -->
     <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         @yield('content')
     </main>
 
-    <!-- FOOTER -->
     <footer class="bg-slate-950 border-t border-slate-800 text-slate-400 py-6 mt-12">
         <div class="max-w-7xl mx-auto px-4 text-center sm:flex sm:justify-between sm:text-left items-center">
             <div>

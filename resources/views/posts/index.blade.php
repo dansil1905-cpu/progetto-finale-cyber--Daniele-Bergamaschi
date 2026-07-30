@@ -2,8 +2,8 @@
 
 @section('content')
 
-    Articoli Recenti sulla Sicurezza
-    Rimani aggiornato sulle ultime notizie, vulnerabilità e guide DevSecOps.
+    Articoli Recenti sulla Sicurezza , 
+    Rimani aggiornato sulle ultime notizie, vulnerabilità e guide DevSecOps : 
 
 
 @if($posts->isEmpty())

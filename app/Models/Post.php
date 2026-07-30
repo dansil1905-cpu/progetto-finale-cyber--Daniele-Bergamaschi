@@ -17,9 +17,7 @@ class Post extends Model
         'id_utente',
     ];
 
-    /**
-     * Relazione: Un articolo appartiene a un utente.
-     */
+
     public function user()
     {
         return $this->belongsTo(User::class, 'id_utente');
